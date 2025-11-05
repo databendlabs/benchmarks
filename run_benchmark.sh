@@ -69,6 +69,8 @@ run_sql() {
     
     echo -e "${YELLOW}Running: $sql_file${NC}"
     
+    # Get start time with nanosecond precision if available, otherwise use seconds
+    # Note: Systems without nanosecond support will have less precise timing (1 second resolution)
     start_time=$(date +%s.%N 2>/dev/null || date +%s)
     
     if "$DATABEND_CLI" --host="$DATABEND_HOST" --port="$DATABEND_PORT" --user="$DATABEND_USER" < "$sql_file" 2>&1; then
