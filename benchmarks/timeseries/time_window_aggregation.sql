@@ -1,7 +1,7 @@
 -- Time Window Aggregation: 5-minute buckets
 
 SELECT 
-    DATE_TRUNC('minute', timestamp, 5) AS time_bucket,
+    TO_TIMESTAMP(FLOOR(TO_UNIX_TIMESTAMP(timestamp) / 300) * 300) AS time_bucket,
     device_id,
     metric_name,
     AVG(metric_value) AS avg_value,
