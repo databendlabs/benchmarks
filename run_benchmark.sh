@@ -15,6 +15,7 @@ NC='\033[0m' # No Color
 DATABEND_HOST="${DATABEND_HOST:-localhost}"
 DATABEND_PORT="${DATABEND_PORT:-8000}"
 DATABEND_USER="${DATABEND_USER:-root}"
+DATABEND_CLI="${DATABEND_CLI:-databend-query}"
 BENCHMARK_DIR="benchmarks"
 
 # Usage function
@@ -32,7 +33,14 @@ OPTIONS:
     -H, --host <host>       Databend host (default: localhost)
     -P, --port <port>       Databend port (default: 8000)
     -u, --user <user>       Databend user (default: root)
+    -c, --cli <command>     Databend CLI command (default: databend-query)
     -a, --all               Run all benchmarks
+
+ENVIRONMENT VARIABLES:
+    DATABEND_HOST           Databend host (can be overridden by -H)
+    DATABEND_PORT           Databend port (can be overridden by -P)
+    DATABEND_USER           Databend user (can be overridden by -u)
+    DATABEND_CLI            Databend CLI command (can be overridden by -c)
 
 EXAMPLES:
     # Run all benchmarks
@@ -40,6 +48,9 @@ EXAMPLES:
 
     # Run TPC-H benchmark
     $0 --benchmark tpch
+
+    # Use bendsql instead of databend-query
+    $0 --benchmark basic --cli bendsql
 
     # Setup only
     $0 --benchmark basic --setup-only
@@ -58,11 +69,12 @@ run_sql() {
     
     echo -e "${YELLOW}Running: $sql_file${NC}"
     
-    start_time=$(date +%s.%N)
+    start_time=$(date +%s.%N 2>/dev/null || date +%s)
     
-    if databend-query --host="$DATABEND_HOST" --port="$DATABEND_PORT" --user="$DATABEND_USER" < "$sql_file" 2>&1; then
-        end_time=$(date +%s.%N)
-        duration=$(echo "$end_time - $start_time" | bc)
+    if "$DATABEND_CLI" --host="$DATABEND_HOST" --port="$DATABEND_PORT" --user="$DATABEND_USER" < "$sql_file" 2>&1; then
+        end_time=$(date +%s.%N 2>/dev/null || date +%s)
+        # Use awk for better portability instead of bc
+        duration=$(awk "BEGIN {print $end_time - $start_time}")
         echo -e "${GREEN}✓ Completed in ${duration}s${NC}"
         echo "$benchmark_name,$(basename $sql_file),$duration" >> benchmark_results.csv
     else
@@ -147,6 +159,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -u|--user)
             DATABEND_USER="$2"
+            shift 2
+            ;;
+        -c|--cli)
+            DATABEND_CLI="$2"
             shift 2
             ;;
         -a|--all)

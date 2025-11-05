@@ -1,4 +1,7 @@
 -- Time Window Aggregation: 5-minute buckets
+-- Note: This uses TO_UNIX_TIMESTAMP for time bucketing which works across different SQL dialects.
+-- If your Databend version supports TIME_WINDOW or other optimized time bucketing functions,
+-- consider using those for better performance on large datasets.
 
 SELECT 
     TO_TIMESTAMP(FLOOR(TO_UNIX_TIMESTAMP(timestamp) / 300) * 300) AS time_bucket,
