@@ -1,0 +1,23 @@
+# Benchmark results
+benchmark_results.csv
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Data files (if any test data is downloaded)
+*.csv.gz
+*.parquet
+*.json.gz
+data/

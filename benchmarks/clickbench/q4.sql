@@ -1,0 +1,3 @@
+-- ClickBench Query 4: COUNT DISTINCT
+
+SELECT COUNT(DISTINCT UserID) FROM hits;
