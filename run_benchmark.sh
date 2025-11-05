@@ -71,16 +71,27 @@ run_sql() {
     
     # Get start time with nanosecond precision if available, otherwise use seconds
     # Note: Systems without nanosecond support will have less precise timing (1 second resolution)
-    start_time=$(date +%s.%N 2>/dev/null || date +%s)
+    start_time=$(date +%s.%N 2>/dev/null)
+    if [[ "$start_time" == *.N* ]] || [[ -z "$start_time" ]]; then
+        # Nanosecond precision not available, fallback to seconds
+        start_time=$(date +%s)
+        echo -e "${YELLOW}Warning: Timing precision limited to 1 second (nanoseconds not supported)${NC}"
+    fi
     
-    if "$DATABEND_CLI" --host="$DATABEND_HOST" --port="$DATABEND_PORT" --user="$DATABEND_USER" < "$sql_file" 2>&1; then
-        end_time=$(date +%s.%N 2>/dev/null || date +%s)
+    # Capture output and errors separately for better error reporting
+    if output=$("$DATABEND_CLI" --host="$DATABEND_HOST" --port="$DATABEND_PORT" --user="$DATABEND_USER" < "$sql_file" 2>&1); then
+        end_time=$(date +%s.%N 2>/dev/null)
+        if [[ "$end_time" == *.N* ]] || [[ -z "$end_time" ]]; then
+            end_time=$(date +%s)
+        fi
         # Use awk for better portability instead of bc
         duration=$(awk "BEGIN {print $end_time - $start_time}")
         echo -e "${GREEN}✓ Completed in ${duration}s${NC}"
         echo "$benchmark_name,$(basename $sql_file),$duration" >> benchmark_results.csv
     else
         echo -e "${RED}✗ Failed${NC}"
+        echo -e "${RED}Error output:${NC}"
+        echo "$output"
         return 1
     fi
 }
@@ -111,11 +122,12 @@ run_benchmark() {
     
     echo -e "${GREEN}Running $benchmark benchmark...${NC}"
     
-    # Run setup if it exists
-    if [ -f "$benchmark_dir/setup.sql" ] && [ "$SETUP_ONLY" != "1" ]; then
+    # Run setup first if we're in setup-only mode or running queries
+    if [ -f "$benchmark_dir/setup.sql" ]; then
         setup_benchmark "$benchmark"
     fi
     
+    # If setup-only mode, skip queries
     if [ "$SETUP_ONLY" == "1" ]; then
         return 0
     fi

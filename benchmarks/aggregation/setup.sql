@@ -1,5 +1,15 @@
 -- Aggregation and JOIN Benchmark Setup
 -- Creates test tables for aggregation and join operations
+--
+-- Data Sizes (configurable by changing numbers() parameter):
+-- - Customers: 10,000 rows
+-- - Products: 5,000 rows  
+-- - Suppliers: 100 rows
+-- - Sales: 100,000 rows (may take a few seconds to generate)
+--
+-- To test with different scales, modify the numbers() function calls:
+-- - Small scale: numbers(1000) for sales
+-- - Large scale: numbers(1000000) for sales
 
 CREATE DATABASE IF NOT EXISTS benchmark_aggregation;
 USE benchmark_aggregation;

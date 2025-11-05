@@ -3,7 +3,8 @@
 -- If your Databend version supports TIME_WINDOW or other optimized time bucketing functions,
 -- consider using those for better performance on large datasets.
 --
--- This query buckets timestamps into 5-minute intervals (300 seconds).
+-- The value 300 represents 5 minutes in seconds (5 * 60 = 300).
+-- To change the bucket size, adjust this value (e.g., 60 for 1-minute, 3600 for 1-hour buckets).
 -- Example: timestamp '2024-01-01 12:07:30' -> time_bucket '2024-01-01 12:05:00'
 --          timestamp '2024-01-01 12:13:45' -> time_bucket '2024-01-01 12:10:00'
 
